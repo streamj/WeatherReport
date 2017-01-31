@@ -1,0 +1,13 @@
+<litepal>
+
+    <dbname value="weather_report" />
+
+    <version value="1" />
+
+    <list>
+
+        <mapping class="com.example.stream.weatherreport.db.Province"/>
+        <mapping class="com.example.stream.weatherreport.db.City"/>
+        <mapping class="com.example.stream.weatherreport.db.County"/>
+    </list>
+</litepal>
