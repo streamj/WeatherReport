@@ -1,6 +1,7 @@
 package com.example.stream.weatherreport;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -12,7 +13,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -68,7 +68,7 @@ public class ChooseFragment extends Fragment {
         mTextView = (TextView) view.findViewById(R.id.choose_text_view);
         mButton = (Button) view.findViewById(R.id.choose_button);
         mListView = (ListView) view.findViewById(R.id.choose_list_view);
-        mAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_list_item_1, dataList);
+        mAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, dataList);
         mListView.setAdapter(mAdapter);
         return view;
     }
@@ -86,6 +86,12 @@ public class ChooseFragment extends Fragment {
                     selectedCity = mCityList.get(position);
                     Log.d("DEBUG", "GET HERE");
                     queryCounties();
+                } else if (currentLevel == LEVEL_COUNTY) {
+                    String weatherId = mCounties.get(position).getWeatherId();
+                    Intent intent = new Intent(getActivity(), WeatherActivity.class);
+                    intent.putExtra(WeatherActivity.WEATHER_ID, weatherId);
+                    startActivity(intent);
+                    getActivity().finish();
                 }
             }
         });
@@ -222,4 +228,5 @@ public class ChooseFragment extends Fragment {
             queryFromServer(defaultAddress +  "/" + provCode + "/" + cityCode, COUNTY_ARG);
         }
     }
+
 }
