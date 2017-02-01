@@ -6,11 +6,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.stream.weatherreport.gson.DailyForcast;
 import com.example.stream.weatherreport.gson.Weather;
 import com.example.stream.weatherreport.util.Helper;
@@ -27,6 +29,7 @@ import okhttp3.Response;
 public class WeatherActivity extends AppCompatActivity {
     public static final String WEATHER = "weather";
     public static final String WEATHER_ID = "weather_id";
+    public static final String BING_PIC = "bing_pic";
 
     @BindView(R.id.weather_layout)
     ScrollView weatherLayout;
@@ -61,6 +64,9 @@ public class WeatherActivity extends AppCompatActivity {
     @BindView(R.id.forecast_layout)
     LinearLayout forecastLayout;
 
+    @BindView(R.id.bing_pic)
+    ImageView bingImage;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,6 +84,39 @@ public class WeatherActivity extends AppCompatActivity {
             weatherLayout.setVisibility(View.INVISIBLE);
             requestWeather(weatherId);
         }
+
+        String bingpic = prefs.getString(BING_PIC, null);
+        if (bingpic != null) {
+            Glide.with(this).load(bingpic).into(bingImage);
+        } else {
+            loadBingPic();
+        }
+    }
+
+    private void loadBingPic() {
+        String requestUrl = "http://guolin.tech/api/bing_pic";
+        HttpUtil.sendOkHttpRequest(requestUrl, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                // the responseString is a bing pic url
+                final String responseString = response.body().string();
+                SharedPreferences.Editor editor = PreferenceManager
+                        .getDefaultSharedPreferences(WeatherActivity.this).edit();
+                editor.putString(BING_PIC, responseString);
+                editor.apply();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Glide.with(WeatherActivity.this).load(responseString).into(bingImage);
+                    }
+                });
+            }
+        });
     }
 
     private void requestWeather(String weatherId) {
@@ -118,6 +157,7 @@ public class WeatherActivity extends AppCompatActivity {
                 });
             }
         });
+        loadBingPic();
     }
 
     private void reportError() {
@@ -131,7 +171,7 @@ public class WeatherActivity extends AppCompatActivity {
         String weatherInfo = weather.mNow.mMore.info;
         titleCity.setText(cityName);
         titleUpdateTime.setText(updateTime);
-        degreeText.setText(degree);
+        degreeText.setText(degree + "°C");
         weatherInfoText.setText(weatherInfo);
         forecastLayout.removeAllViews(); // what the fuck?
         for (DailyForcast dailyForcast : weather.mDailyForcasts) {
@@ -140,7 +180,11 @@ public class WeatherActivity extends AppCompatActivity {
             TextView infoText = (TextView) view.findViewById(R.id.info_textview);
             TextView maxText = (TextView) view.findViewById(R.id.max_textview);
             TextView minText = (TextView) view.findViewById(R.id.min_textview);
-            dateText.setText(dailyForcast.date);
+
+            String date2 = dailyForcast.date.split("-")[2];
+            String date1 = dailyForcast.date.split("-")[1];
+
+            dateText.setText(date1 + "-" + date2);
             infoText.setText(dailyForcast.condition.textDay);
             maxText.setText(dailyForcast.mTemperature.max);
             minText.setText(dailyForcast.mTemperature.min);

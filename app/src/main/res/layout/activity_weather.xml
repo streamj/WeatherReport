@@ -5,8 +5,13 @@
     android:id="@+id/activity_weather"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
     tools:context="com.example.stream.weatherreport.WeatherActivity">
+
+    <ImageView
+        android:id="@+id/bing_pic"
+        android:scaleType="centerCrop"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
     <ScrollView
         android:id="@+id/weather_layout"
