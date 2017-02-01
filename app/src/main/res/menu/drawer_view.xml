@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group>
+        <item android:id="@+id/navigation_item1"
+              android:checkable="true"
+              android:title="热门图片"
+              android:icon="@drawable/like"/>
+        <item android:id="@+id/navigation_item2"
+              android:checkable="true"
+              android:title="联系人"
+              android:icon="@drawable/user"/>
+        <item android:id="@+id/navigation_item3"
+              android:checkable="true"
+              android:title="图库"
+              android:icon="@drawable/photo"/>
+    </group>
+    <item android:id="@+id/navigation_sub"
+          android:title="新增功能">
+        <menu>
+            <item android:id="@+id/navigation_sub_item1"
+                  android:checkable="true"
+                  android:title="地图导航"
+                  android:icon="@drawable/location"/>
+            <item android:id="@+id/navigation_sub_item2"
+                  android:checkable="true"
+                  android:title="最近热门"
+                  android:icon="@drawable/star"/>
+            <item android:id="@+id/navigation_sub_item3"
+                  android:checkable="true"
+                  android:title="社交圈子"
+                  android:icon="@drawable/bubble"/>
+
+            <item android:id="@+id/navigation_sub_item4"
+                  android:title="夜间模式"
+                  android:icon="@drawable/lights"/>
+        </menu>
+    </item>
+
+</menu>

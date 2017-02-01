@@ -6,4 +6,8 @@
 
     <color name="colorBackgroundWidget">#fff</color>
     <color name="titleTextColor">#fff</color>
+
+    <color name="primaryText">#212121</color>
+    <color name="secondaryText">#727272</color>
+    <color name="forecast_low_text">#607D8B</color>
 </resources>
