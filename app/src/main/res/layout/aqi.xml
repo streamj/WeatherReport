@@ -17,6 +17,12 @@
         android:text="空气质量"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
+
+    <TextView
+        android:id="@+id/aqi_quality"
+        android:layout_gravity="center_horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
     
     <LinearLayout
         android:layout_margin="15dp"
@@ -75,5 +81,11 @@
         </RelativeLayout>
         
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/aqi_suggestion_text"
+        android:layout_margin="15dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
 
 </LinearLayout>

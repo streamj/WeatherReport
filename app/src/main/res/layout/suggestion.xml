@@ -16,6 +16,8 @@
         android:layout_marginLeft="15dp"
         android:layout_marginTop="15dp"
         android:layout_height="wrap_content"/>
+
+
     <TextView
         android:id="@+id/textview_comfort"
         android:layout_width="wrap_content"

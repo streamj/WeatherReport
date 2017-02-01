@@ -19,11 +19,11 @@
         <menu>
             <item android:id="@+id/navigation_sub_item1"
                   android:checkable="true"
-                  android:title="地图导航"
+                  android:title="选择城市"
                   android:icon="@drawable/location"/>
             <item android:id="@+id/navigation_sub_item2"
                   android:checkable="true"
-                  android:title="最近热门"
+                  android:title="偏好设置"
                   android:icon="@drawable/star"/>
             <item android:id="@+id/navigation_sub_item3"
                   android:checkable="true"

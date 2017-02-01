@@ -84,10 +84,11 @@ public class ChooseFragment extends Fragment {
                     queryCities();
                 } else if (currentLevel == LEVEL_CITY) {
                     selectedCity = mCityList.get(position);
-                    Log.d("DEBUG", "GET HERE");
+//                    Log.d("DEBUG", "GET HERE");
                     queryCounties();
                 } else if (currentLevel == LEVEL_COUNTY) {
                     String weatherId = mCounties.get(position).getWeatherId();
+                    // 如果没有缓存，是从这里进去的，那么当然 intent 会有东西了
                     Intent intent = new Intent(getActivity(), WeatherActivity.class);
                     intent.putExtra(WeatherActivity.WEATHER_ID, weatherId);
                     startActivity(intent);
@@ -127,7 +128,7 @@ public class ChooseFragment extends Fragment {
 
     private void queryFromServer(String address, final String type) {
         showProgressDialog();
-        Log.d("DEBUG", address);
+//        Log.d("DEBUG", address);
         HttpUtil.sendOkHttpRequest(address, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -224,7 +225,7 @@ public class ChooseFragment extends Fragment {
             int provCode = selectedProv.getProvinceCode();
             int cityCode = selectedCity.getCityCode();
             String addresss = defaultAddress + "/" + provCode + "/" + cityCode;
-            Log.d("DEBUG", addresss);
+//            Log.d("DEBUG", addresss);
             queryFromServer(defaultAddress +  "/" + provCode + "/" + cityCode, COUNTY_ARG);
         }
     }

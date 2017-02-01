@@ -8,7 +8,6 @@
     tools:context="com.example.stream.weatherreport.MainActivity">
 
 
-
     <fragment
         android:id="@+id/choose_fragment"
         android:name="com.example.stream.weatherreport.ChooseFragment"

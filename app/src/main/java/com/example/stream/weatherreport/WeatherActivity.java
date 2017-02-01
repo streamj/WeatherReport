@@ -3,12 +3,15 @@ package com.example.stream.weatherreport;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -60,11 +63,17 @@ public class WeatherActivity extends AppCompatActivity {
     @BindView(R.id.now_item_date_textview)
     TextView nowDateText;
 
+    @BindView(R.id.aqi_quality)
+    TextView aqiQuality;
+
     @BindView(R.id.aqi_textview)
     TextView aqiText;
 
     @BindView(R.id.pm25_textview)
     TextView pm25Text;
+
+    @BindView(R.id.aqi_suggestion_text)
+    TextView aqiSuggestion;
 
     @BindView(R.id.textview_comfort)
     TextView comfortText;
@@ -90,6 +99,10 @@ public class WeatherActivity extends AppCompatActivity {
     @BindView(R.id.draw_layout)
     public DrawerLayout mDrawLayout;
 
+
+    @BindView(R.id.nav_view)
+    NavigationView navigation;
+
     private static long lastUpdateTime = 0;
     private static boolean firstRequest = false;
 
@@ -101,29 +114,98 @@ public class WeatherActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
-        mSwipeRefresh.setColorSchemeResources(R.color.colorPrimary);
+        setUpNavButton();
+        setUpNavigationView();
+
+        // 事先设定的 weatherId
+        String selectedWeatherId = getIntent().getStringExtra(WEATHER_ID);
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        // 缓存在设置里的 weatherJSON
+        String weatherString = prefs.getString(WEATHER, null);
+
+
+        final String weatherId;
+
+        // 缓存过 JSON
+        if (weatherString != null) {
+            // 先用缓存的 json 获取 weatherId
+//            Weather weather = Helper.onWeatherResponse(weatherString);
+//            weatherId = weather.mBasic.weatherId;
+
+            // 从 ChooseActivity 重新选择城市之后进的，有 intent 值
+            if (selectedWeatherId != null) {
+                weatherLayout.setVisibility(View.INVISIBLE);
+                weatherId = selectedWeatherId;
+                requestWeather(weatherId);
+            } else {
+                // 从 mainActivity 进的, 没有 intent 值,说明没重新选择城市，那么直接用缓存信息显示
+                Weather weather = Helper.onWeatherResponse(weatherString);
+                weatherId = weather.mBasic.weatherId;
+                showWeatherInfo(weather);
+            }
+
+        } else {
+            // 没有缓存过，说明是第一次
+            weatherId = selectedWeatherId;
+            weatherLayout.setVisibility(View.INVISIBLE);
+            requestWeather(weatherId);
+            //todo 把 service 搞成单例
+//            if (firstRequest) {
+//                startActivity(new Intent(this, AutoUpdateService.class));
+//            }
+        }
+        setUpSwipeRefresh(weatherId);
+
+
+        String bingpic = prefs.getString(BING_PIC, null);
+        if (bingpic != null) {
+            Glide.with(this).load(bingpic).into(bingImage);
+        } else {
+            loadBingPic();
+        }
+    }
+
+    private void setUpNavigationView() {
+        navigation.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            //用于辨别此前是否已有选中条目
+            MenuItem preMenuItem;
+
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                //首先将选中条目变为选中状态 即checked为true,后关闭Drawer，以前选中的Item需要变为未选中状态
+                if (preMenuItem != null) {
+                    preMenuItem.setChecked(false);
+                }
+                menuItem.setChecked(true);
+                mDrawLayout.closeDrawers();
+                preMenuItem = menuItem;
+                switch (menuItem.getItemId()) {
+                    case R.id.navigation_sub_item1:
+                        startActivity(new Intent(WeatherActivity.this, ChooseActivity.class));
+                        finish();
+                        break;
+                    case R.id.navigation_sub_item2:
+                        Toast.makeText(WeatherActivity.this, "Unimplemented", Toast.LENGTH_SHORT).show();
+                        break;
+
+                }
+                return true;
+            }
+        });
+    }
+
+    private void setUpNavButton() {
         navButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mDrawLayout.openDrawer(GravityCompat.START);
             }
         });
+    }
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        String weatherString = prefs.getString(WEATHER, null);
-        final String weatherId;
-        if (weatherString != null) {
-            Weather weather = Helper.onWeatherResponse(weatherString);
-            weatherId = weather.mBasic.weatherId;
-            showWeatherInfo(weather);
-        } else {
-            weatherId = getIntent().getStringExtra(WEATHER_ID);
-            weatherLayout.setVisibility(View.INVISIBLE);
-            requestWeather(weatherId);
-            if (firstRequest) {
-                startActivity(new Intent(this, AutoUpdateService.class));
-            }
-        }
+    private void setUpSwipeRefresh(final String weatherId) {
+        mSwipeRefresh.setColorSchemeResources(R.color.colorPrimary);
         mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -141,13 +223,6 @@ public class WeatherActivity extends AppCompatActivity {
                 }
             }
         });
-
-        String bingpic = prefs.getString(BING_PIC, null);
-        if (bingpic != null) {
-            Glide.with(this).load(bingpic).into(bingImage);
-        } else {
-            loadBingPic();
-        }
     }
 
     private void loadBingPic() {
@@ -179,7 +254,7 @@ public class WeatherActivity extends AppCompatActivity {
     private void requestWeather(String weatherId) {
         String weatherUrl = "https://free-api.heweather.com/v5/weather?city=" + weatherId +
                 "&key=" + "6cb14caab7ed4550ac62689c2bea387d";
-        Log.d("DEBUG", weatherUrl);
+//        Log.d("DEBUG", weatherUrl);
         HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -197,12 +272,13 @@ public class WeatherActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 final String responseString = response.body().string();
-                Log.d("DEBUG", responseString);
+//                Log.d("DEBUG", responseString);
                 final Weather weather = Helper.onWeatherResponse(responseString);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         if (weather != null && (weather.mStatus).equals("ok")) {
+                            // 请求成功，缓存并显示
                             SharedPreferences.Editor editor = PreferenceManager
                                     .getDefaultSharedPreferences(WeatherActivity.this)
                                     .edit();
@@ -254,7 +330,7 @@ public class WeatherActivity extends AppCompatActivity {
 
             String weatherCondition = dailyForcast.condition.textDay;
             infoText.setText(weatherCondition);
-            int imageResource =  getWeatherImage(weatherCondition, false);
+            int imageResource = getWeatherImage(weatherCondition, false);
             forecastImage.setImageResource(imageResource);
             maxText.setText(dailyForcast.mTemperature.max);
             minText.setText(dailyForcast.mTemperature.min);
@@ -262,8 +338,12 @@ public class WeatherActivity extends AppCompatActivity {
             forecastLayout.addView(view);
         }
         if (weather.mAQI != null) {
+            aqiQuality.setText(weather.mAQI.mAQICity.qlty);
             aqiText.setText(weather.mAQI.mAQICity.aqi);
             pm25Text.setText(weather.mAQI.mAQICity.pm25);
+            String aqisu = weather.mSuggestion.air.txt;
+            aqiSuggestion.setText(aqisu);
+
         }
         String comfort = "舒适度: " + weather.mSuggestion.mComfort.info;
         String washCar = "洗车指数: " + weather.mSuggestion.mCarWash.info;

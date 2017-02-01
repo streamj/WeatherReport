@@ -26,6 +26,9 @@
             android:enabled="true"
             android:exported="true">
         </service>
+
+        <activity android:name=".ChooseActivity">
+        </activity>
     </application>
 
 </manifest>
