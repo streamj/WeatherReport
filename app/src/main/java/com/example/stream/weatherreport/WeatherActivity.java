@@ -104,7 +104,6 @@ public class WeatherActivity extends AppCompatActivity {
     NavigationView navigation;
 
     private static long lastUpdateTime = 0;
-    private static boolean firstRequest = false;
 
 
     @Override
@@ -150,10 +149,7 @@ public class WeatherActivity extends AppCompatActivity {
             weatherId = selectedWeatherId;
             weatherLayout.setVisibility(View.INVISIBLE);
             requestWeather(weatherId);
-            //todo 把 service 搞成单例
-//            if (firstRequest) {
-//                startActivity(new Intent(this, AutoUpdateService.class));
-//            }
+            startService(new Intent(this, AutoUpdateService.class));
         }
         setUpSwipeRefresh(weatherId);
 
