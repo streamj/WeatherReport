@@ -12,7 +12,7 @@ public class City extends DataSupport {
     private int cityCode;
     private int provinceId;
 
-    public int getId() {
+    public synchronized int getId() {
         return id;
     }
 

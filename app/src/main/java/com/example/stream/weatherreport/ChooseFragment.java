@@ -190,9 +190,11 @@ public class ChooseFragment extends Fragment {
     private void queryCities() {
         mTextView.setText(selectedProv.getProvinceName());
         mButton.setVisibility(View.VISIBLE);
-        mCityList = DataSupport
-                .where("provinceid=? ", String.valueOf(selectedProv.getId()))
-                .find(City.class);
+        synchronized (City.class) {
+            mCityList = DataSupport
+                    .where("provinceid=? ", String.valueOf(selectedProv.getId()))
+                    .find(City.class);
+        }
         if (mCityList.size() > 0) {
             dataList.clear();
             for (City city : mCityList) {
@@ -210,9 +212,11 @@ public class ChooseFragment extends Fragment {
     private void queryCounties() {
         mTextView.setText(selectedCity.getCityName());
         mButton.setVisibility(View.VISIBLE);
-        mCounties = DataSupport
-                .where("cityid=? ", String.valueOf(selectedCity.getId()))
-                .find(County.class);
+        synchronized (County.class) {
+            mCounties = DataSupport
+                    .where("cityid=? ", String.valueOf(selectedCity.getId()))
+                    .find(County.class);
+        }
         if (mCounties.size()  > 0 ) {
             dataList.clear();
             for (County county: mCounties) {
