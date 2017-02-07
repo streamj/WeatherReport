@@ -29,6 +29,10 @@
 
         <activity android:name=".ChooseActivity">
         </activity>
+
+        <activity android:name=".SettingActivity">
+
+        </activity>
     </application>
 
 </manifest>

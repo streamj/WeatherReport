@@ -10,7 +10,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -177,12 +176,13 @@ public class WeatherActivity extends AppCompatActivity {
                 mDrawLayout.closeDrawers();
                 preMenuItem = menuItem;
                 switch (menuItem.getItemId()) {
-                    case R.id.navigation_sub_item1:
+                    case R.id.select_city:
                         startActivity(new Intent(WeatherActivity.this, ChooseActivity.class));
-                        finish();
+//                        finish(); // don't finish
                         break;
-                    case R.id.navigation_sub_item2:
-                        Toast.makeText(WeatherActivity.this, "Unimplemented", Toast.LENGTH_SHORT).show();
+                    case R.id.preferences:
+                        startActivity(new Intent(WeatherActivity.this, SettingActivity.class));
+//                        Toast.makeText(WeatherActivity.this, "Unimplemented", Toast.LENGTH_SHORT).show();
                         break;
 
                 }
