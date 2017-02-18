@@ -17,6 +17,7 @@ public class SettingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+        this.getWindow().setBackgroundDrawable(null);
         if (savedInstanceState == null) {
             mSettingFragment = new SettingFragment();
             replaceFragment(R.id.settings_container, mSettingFragment);

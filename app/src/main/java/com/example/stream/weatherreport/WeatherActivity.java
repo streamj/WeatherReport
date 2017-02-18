@@ -109,6 +109,7 @@ public class WeatherActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather);
+        this.getWindow().setBackgroundDrawable(null); // 防止 overdraw
 
         ButterKnife.bind(this);
 
