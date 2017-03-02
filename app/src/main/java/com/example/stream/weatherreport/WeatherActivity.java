@@ -8,8 +8,10 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -27,8 +29,10 @@ import com.example.stream.weatherreport.util.HttpUtil;
 
 import java.io.IOException;
 
+import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import jp.wasabeef.glide.transformations.CropCircleTransformation;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -41,7 +45,7 @@ public class WeatherActivity extends AppCompatActivity {
     @BindView(R.id.weather_layout)
     ScrollView weatherLayout;
 
-    @BindView(R.id.textview_city)
+    @BindView(R.id.toolbar_text_view)
     TextView titleCity;
 
     @BindView(R.id.textview_update_time)
@@ -92,8 +96,10 @@ public class WeatherActivity extends AppCompatActivity {
     @BindView(R.id.swipe_refresh)
     SwipeRefreshLayout mSwipeRefresh;
 
-    @BindView(R.id.nav_button)
-    Button navButton;
+//    @BindView(R.id.nav_button)
+//    Button navButton;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
 
     @BindView(R.id.draw_layout)
     public DrawerLayout mDrawLayout;
@@ -101,8 +107,12 @@ public class WeatherActivity extends AppCompatActivity {
 
     @BindView(R.id.nav_view)
     NavigationView navigation;
+    @BindString(R.string.user_profile_photo)
+    String profilePhoto;
 
     private static long lastUpdateTime = 0;
+
+    private ImageView ivMenuUserProfilePhoto;
 
 
     @Override
@@ -112,8 +122,7 @@ public class WeatherActivity extends AppCompatActivity {
         this.getWindow().setBackgroundDrawable(null); // 防止 overdraw
 
         ButterKnife.bind(this);
-
-        setUpNavButton();
+        setUpToolbar();
         setUpNavigationView();
 
         // 事先设定的 weatherId
@@ -162,7 +171,34 @@ public class WeatherActivity extends AppCompatActivity {
         }
     }
 
+    private void setUpToolbar() {
+        setSupportActionBar(toolbar);
+        final ActionBar ab = getSupportActionBar();
+        if (ab != null) {
+            // 返回键导航的图标设置
+            ab.setHomeAsUpIndicator(R.drawable.ic_menu_white);
+            // 让 toolbar title 消失
+            ab.setDisplayShowTitleEnabled(false);
+            // 给左上角图标的左边加上一个返回的图标 。对应ActionBar.DISPLAY_HOME_AS_UP
+            ab.setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
     private void setUpNavigationView() {
+        View headerView = navigation.getHeaderView(0);
+        ivMenuUserProfilePhoto = (ImageView) headerView.findViewById(R.id.ivMenuUserProfilePhoto);
+        headerView.findViewById(R.id.vGlobalMenuHeader).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(WeatherActivity.this, "Hello!", Toast.LENGTH_SHORT).show();
+            }
+        });
+        Glide.with(this)
+                .load(profilePhoto)
+                .error(R.drawable.unknown)
+                .bitmapTransform(new CropCircleTransformation(this))
+                .into(ivMenuUserProfilePhoto);
+
         navigation.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             //用于辨别此前是否已有选中条目
             MenuItem preMenuItem;
@@ -181,7 +217,7 @@ public class WeatherActivity extends AppCompatActivity {
                         startActivity(new Intent(WeatherActivity.this, ChooseActivity.class));
 //                        finish(); // don't finish
                         break;
-                    case R.id.preferences:
+                    case R.id.menu_settings:
                         startActivity(new Intent(WeatherActivity.this, SettingActivity.class));
 //                        Toast.makeText(WeatherActivity.this, "Unimplemented", Toast.LENGTH_SHORT).show();
                         break;
@@ -192,13 +228,12 @@ public class WeatherActivity extends AppCompatActivity {
         });
     }
 
-    private void setUpNavButton() {
-        navButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mDrawLayout.openDrawer(GravityCompat.START);
-            }
-        });
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            mDrawLayout.openDrawer(GravityCompat.START);
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void setUpSwipeRefresh(final String weatherId) {

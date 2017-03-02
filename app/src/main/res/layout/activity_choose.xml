@@ -7,6 +7,7 @@
     android:layout_height="match_parent"
     tools:context="com.example.stream.weatherreport.ChooseActivity">
 
+
     <fragment
                  android:id="@+id/fragment_container"
                  android:name="com.example.stream.weatherreport.ChooseFragment"

@@ -8,4 +8,8 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+
+    <style name="ToolbarTextStyle">
+        <item name="android:textColor">@color/titleTextColor</item>
+    </style>
 </resources>

@@ -5,15 +5,17 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -38,6 +40,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -57,19 +61,25 @@ public class ChooseFragment extends Fragment {
     public static final String FAILURE_NOTE = "loading failed";
 
     private ProgressDialog mProgressDialog;
-    private TextView mTextView;
-    private Button mButton;
-    private ListView mListView;
+    @BindView(R.id.toolbar_text_view)
+    TextView mTextView;
+    @BindView(R.id.choose_list_view)
+    ListView mListView;
     //    private ArrayAdapter<String> mAdapter;
     private List<String> dataList = new ArrayList<>();
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
 
-    private Sidebar sideBar;
+    @BindView(R.id.sidrbar)
+    Sidebar sideBar;
     /**
      * 显示字母的TextView
      */
-    private TextView dialog;
+    @BindView(R.id.dialog)
+    TextView dialog;
     private SortAdapter adapter;
-    private EditText mClearEditText;
+    @BindView(R.id.filter_edit)
+    EditText mClearEditText;
 
     /**
      * 汉字转换成拼音的类
@@ -95,22 +105,43 @@ public class ChooseFragment extends Fragment {
     private City selectedCity;
     private int currentLevel;
 
+    private  ActionBar mActionBar;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.choose, container, false);
-        mTextView = (TextView) view.findViewById(R.id.choose_text_view);
-        mButton = (Button) view.findViewById(R.id.choose_button);
-        mListView = (ListView) view.findViewById(R.id.choose_list_view);
+        ButterKnife.bind(this, view);
+
+        initWidgets();
+        setUpEvents();
+        return view;
+    }
+
+    private void initWidgets() {
+        setHasOptionsMenu(true);
+        AppCompatActivity activity =  (AppCompatActivity) getActivity();
+        activity.setSupportActionBar(toolbar);
+        mActionBar = activity.getSupportActionBar();
+        // 返回键导航的图标设置
+        if (mActionBar != null) {
+            // 让 toolbar title 消失
+            mActionBar.setDisplayShowTitleEnabled(false);
+            mActionBar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
+            mActionBar.setDisplayHomeAsUpEnabled(false);
+        }
+
         //实例化汉字转拼音类
         characterParser = CharacterParser.getInstance();
-
         pinyinComparator = new PinyinComparator();
-
-        sideBar = (Sidebar) view.findViewById(R.id.sidrbar);
-        dialog = (TextView) view.findViewById(R.id.dialog);
         sideBar.setTextView(dialog);
+        SourceDateList = new ArrayList<>();
+        adapter = new SortAdapter(getActivity(), SourceDateList);
+//        mAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, dataList);
+        mListView.setAdapter(adapter);
+    }
 
+    private void setUpEvents(){
         //设置右侧触摸监听
         sideBar.setOnTouchingLetterChangedListener(new Sidebar.OnTouchingLetterChangedListener() {
 
@@ -124,12 +155,6 @@ public class ChooseFragment extends Fragment {
 
             }
         });
-        SourceDateList = new ArrayList<>();
-        adapter = new SortAdapter(getActivity(), SourceDateList);
-//        mAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, dataList);
-        mListView.setAdapter(adapter);
-        mClearEditText = (EditText) view.findViewById(R.id.filter_edit);
-
         //根据输入框输入值的改变来过滤搜索
         mClearEditText.addTextChangedListener(new TextWatcher() {
 
@@ -149,7 +174,6 @@ public class ChooseFragment extends Fragment {
             public void afterTextChanged(Editable s) {
             }
         });
-        return view;
     }
 
     @Override
@@ -177,17 +201,19 @@ public class ChooseFragment extends Fragment {
                 }
             }
         });
-        mButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (currentLevel == LEVEL_COUNTY) {
-                    queryCities();
-                } else if (currentLevel == LEVEL_CITY) {
-                    queryProvinces();
-                }
-            }
-        });
         queryProvinces();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            if (currentLevel == LEVEL_COUNTY) {
+                queryCities();
+            } else if (currentLevel == LEVEL_CITY) {
+                queryProvinces();
+            }
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void closeProgressDialog() {
@@ -206,8 +232,9 @@ public class ChooseFragment extends Fragment {
     }
 
     private void queryProvinces() {
-        mTextView.setText("中国");
-        mButton.setVisibility(View.GONE);
+        mTextView.setText("选择省份");
+//        mButton.setVisibility(View.GONE);
+        mActionBar.setDisplayHomeAsUpEnabled(false);
         mProvinceList = DataSupport.findAll(Province.class);
         if (mProvinceList.size() > 0) {
             dataList.clear();
@@ -231,7 +258,8 @@ public class ChooseFragment extends Fragment {
     private void queryCities() {
         mClearEditText.setText("");
         mTextView.setText(selectedProv.getProvinceName());
-        mButton.setVisibility(View.VISIBLE);
+//        mButton.setVisibility(View.VISIBLE);
+        mActionBar.setDisplayHomeAsUpEnabled(true);
         synchronized (City.class) {
             mCityList = DataSupport
                     .where("provinceid=? ", String.valueOf(selectedProv.getId()))
@@ -259,7 +287,8 @@ public class ChooseFragment extends Fragment {
     private void queryCounties() {
         mClearEditText.setText("");
         mTextView.setText(selectedCity.getCityName());
-        mButton.setVisibility(View.VISIBLE);
+//        mButton.setVisibility(View.VISIBLE);
+        mActionBar.setDisplayHomeAsUpEnabled(true);
         synchronized (County.class) {
             mCounties = DataSupport
                     .where("cityid=? ", String.valueOf(selectedCity.getId()))

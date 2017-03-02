@@ -1,39 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <group>
-        <item android:id="@+id/navigation_item1"
-              android:checkable="true"
-              android:title="热门图片"
-              android:icon="@drawable/like"/>
-        <item android:id="@+id/navigation_item2"
-              android:checkable="true"
-              android:title="联系人"
-              android:icon="@drawable/user"/>
-        <item android:id="@+id/navigation_item3"
-              android:checkable="true"
-              android:title="图库"
-              android:icon="@drawable/photo"/>
+    <group android:id="@+id/menu_group_1">
+        <item
+            android:id="@+id/menu_feed"
+            android:icon="@drawable/ic_global_menu_feed"
+            android:title="My Feed" />
+        <item
+            android:id="@+id/menu_direct"
+            android:icon="@drawable/ic_global_menu_direct"
+            android:title="Instagram Direct" />
+        <item
+            android:id="@+id/menu_news"
+            android:icon="@drawable/ic_global_menu_news"
+            android:title="News" />
+        <item
+            android:id="@+id/menu_popular"
+            android:icon="@drawable/ic_global_menu_popular"
+            android:title="Popular" />
+        <item
+            android:id="@+id/select_city"
+            android:icon="@drawable/ic_global_menu_nearby"
+            android:title="Select City" />
+        <item
+            android:id="@+id/menu_photo_you_liked"
+            android:icon="@drawable/ic_global_menu_likes"
+            android:title="Photos You've Liked" />
     </group>
-    <item android:id="@+id/navigation_sub"
-          android:title="新增功能">
-        <menu>
-            <item android:id="@+id/select_city"
-                  android:checkable="true"
-                  android:title="选择城市"
-                  android:icon="@drawable/location"/>
-            <item android:id="@+id/preferences"
-                  android:checkable="true"
-                  android:title="偏好设置"
-                  android:icon="@drawable/setting"/>
-            <item android:id="@+id/about"
-                  android:checkable="true"
-                  android:title="软件信息"
-                  android:icon="@drawable/information"/>
-
-            <item android:id="@+id/night_mode"
-                  android:title="夜间模式"
-                  android:icon="@drawable/night"/>
-        </menu>
-    </item>
-
+    <group android:id="@+id/menu_group_2">
+        <item
+            android:id="@+id/menu_settings"
+            android:title="Settings" />
+        <item
+            android:id="@+id/menu_about"
+            android:title="About" />
+    </group>
 </menu>

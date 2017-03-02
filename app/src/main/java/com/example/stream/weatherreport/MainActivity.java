@@ -22,7 +22,6 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         }
-//        Log.d("DEBUG", "CAN YOU SEE ME");
     }
 
 }
