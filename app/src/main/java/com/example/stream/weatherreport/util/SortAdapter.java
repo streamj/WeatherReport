@@ -35,18 +35,22 @@ public class SortAdapter extends BaseAdapter implements SectionIndexer {
         this.list = list;
         notifyDataSetChanged();
     }
+
     @Override
     public int getCount() {
         return this.list.size();
     }
+
     @Override
     public Object getItem(int position) {
         return list.get(position);
     }
+
     @Override
     public long getItemId(int position) {
         return position;
     }
+
     @Override
     public View getView(final int position, View view, ViewGroup arg2) {
         ViewHolder viewHolder;
