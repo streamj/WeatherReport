@@ -10,7 +10,7 @@ import android.os.SystemClock;
 import android.preference.PreferenceManager;
 
 import com.example.stream.weatherreport.gson.Weather;
-import com.example.stream.weatherreport.util.Helper;
+import com.example.stream.weatherreport.util.WeatherHelper;
 import com.example.stream.weatherreport.util.HttpUtil;
 
 import java.io.IOException;
@@ -49,7 +49,7 @@ public class AutoUpdateService extends Service {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String weatherString = prefs.getString(WeatherActivity.WEATHER, null);
         if (weatherString != null) {
-            Weather weather = Helper.onWeatherResponse(weatherString);
+            Weather weather = WeatherHelper.onWeatherResponse(weatherString);
             String weatherId = weather.mBasic.weatherId;
             String weatherUrl = "https://free-api.heweather.com/v5/weather?city=" + weatherId +
                     "&key=" + "6cb14caab7ed4550ac62689c2bea387d";
@@ -62,7 +62,7 @@ public class AutoUpdateService extends Service {
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
                     String responseString = response.body().string();
-                    Weather weather = Helper.onWeatherResponse(responseString);
+                    Weather weather = WeatherHelper.onWeatherResponse(responseString);
                     if (weather != null && weather.mStatus.equals("ok")) {
                         SharedPreferences.Editor editor = PreferenceManager
                                 .getDefaultSharedPreferences(AutoUpdateService.this)

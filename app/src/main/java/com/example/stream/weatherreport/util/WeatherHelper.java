@@ -17,7 +17,7 @@ import org.json.JSONObject;
  * Created by StReaM on 1/31/2017.
  */
 
-public class Helper {
+public class WeatherHelper {
     public static boolean onProvinceResponse(String response) {
         if (!TextUtils.isEmpty(response)) {
             try {

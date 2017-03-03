@@ -23,7 +23,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.stream.weatherreport.gson.DailyForcast;
 import com.example.stream.weatherreport.gson.Weather;
-import com.example.stream.weatherreport.util.Helper;
+import com.example.stream.weatherreport.util.WeatherHelper;
 import com.example.stream.weatherreport.util.HttpUtil;
 
 import java.io.IOException;
@@ -135,7 +135,7 @@ public class WeatherActivity extends AppCompatActivity {
         // 缓存过 JSON
         if (weatherString != null) {
             // 先用缓存的 json 获取 weatherId
-//            Weather weather = Helper.onWeatherResponse(weatherString);
+//            Weather weather = WeatherHelper.onWeatherResponse(weatherString);
 //            weatherId = weather.mBasic.weatherId;
 
             // 从 ChooseActivity 重新选择城市之后进的，有 intent 值
@@ -145,7 +145,7 @@ public class WeatherActivity extends AppCompatActivity {
                 requestWeather(weatherId);
             } else {
                 // 从 mainActivity 进的, 没有 intent 值,说明没重新选择城市，那么直接用缓存信息显示
-                Weather weather = Helper.onWeatherResponse(weatherString);
+                Weather weather = WeatherHelper.onWeatherResponse(weatherString);
                 weatherId = weather.mBasic.weatherId;
                 showWeatherInfo(weather);
             }
@@ -302,7 +302,7 @@ public class WeatherActivity extends AppCompatActivity {
             public void onResponse(Call call, Response response) throws IOException {
                 final String responseString = response.body().string();
 //                Log.d("DEBUG", responseString);
-                final Weather weather = Helper.onWeatherResponse(responseString);
+                final Weather weather = WeatherHelper.onWeatherResponse(responseString);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -343,7 +343,7 @@ public class WeatherActivity extends AppCompatActivity {
         nowDateText.setText(nowTime);
         nowWeatherInfo.setText(weatherInfo);
         nowWeatherImageIcon.setImageResource(getWeatherImage(weatherInfo, true));
-        forecastLayout.removeAllViews(); // what the fuck?
+        forecastLayout.removeAllViews();
         for (DailyForcast dailyForcast : weather.mDailyForcasts) {
             View view = getLayoutInflater().inflate(R.layout.forecast_item, forecastLayout, false);
             TextView dateText = (TextView) view.findViewById(R.id.date_textview);

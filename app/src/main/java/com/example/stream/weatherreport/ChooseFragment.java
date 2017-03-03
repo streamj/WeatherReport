@@ -7,17 +7,18 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,10 +27,10 @@ import com.example.stream.weatherreport.db.County;
 import com.example.stream.weatherreport.db.Province;
 import com.example.stream.weatherreport.model.SortModel;
 import com.example.stream.weatherreport.util.CharacterParser;
-import com.example.stream.weatherreport.util.Helper;
+import com.example.stream.weatherreport.util.NewSortAdapter;
+import com.example.stream.weatherreport.util.WeatherHelper;
 import com.example.stream.weatherreport.util.HttpUtil;
 import com.example.stream.weatherreport.util.PinyinComparator;
-import com.example.stream.weatherreport.util.SortAdapter;
 
 import org.litepal.crud.DataSupport;
 
@@ -50,7 +51,7 @@ import okhttp3.Response;
  * Created by StReaM on 1/31/2017.
  */
 
-public class ChooseFragment extends Fragment {
+public class ChooseFragment extends Fragment implements NewSortAdapter.OnItemClickListener {
     public static final int LEVEL_PROV = 0;
     public static final int LEVEL_CITY = 1;
     public static final int LEVEL_COUNTY = 2;
@@ -63,8 +64,11 @@ public class ChooseFragment extends Fragment {
     private ProgressDialog mProgressDialog;
     @BindView(R.id.toolbar_text_view)
     TextView mTextView;
+//    @BindView(R.id.choose_list_view)
+//    ListView mListView;
+
     @BindView(R.id.choose_list_view)
-    ListView mListView;
+    RecyclerView mRecyclerView;
     //    private ArrayAdapter<String> mAdapter;
     private List<String> dataList = new ArrayList<>();
     @BindView(R.id.toolbar)
@@ -77,7 +81,10 @@ public class ChooseFragment extends Fragment {
      */
     @BindView(R.id.dialog)
     TextView dialog;
-    private SortAdapter adapter;
+
+//    private SortAdapter adapter;
+    private NewSortAdapter adapter;
+
     @BindView(R.id.filter_edit)
     EditText mClearEditText;
 
@@ -85,7 +92,7 @@ public class ChooseFragment extends Fragment {
      * 汉字转换成拼音的类
      */
     private CharacterParser characterParser;
-    private List<SortModel> SourceDateList;
+    private List<SortModel> mSourceDateList;
     /**
      * 根据拼音来排列ListView里面的数据类
      */
@@ -135,10 +142,15 @@ public class ChooseFragment extends Fragment {
         characterParser = CharacterParser.getInstance();
         pinyinComparator = new PinyinComparator();
         sideBar.setTextView(dialog);
-        SourceDateList = new ArrayList<>();
-        adapter = new SortAdapter(getActivity(), SourceDateList);
+        mSourceDateList = new ArrayList<>();
+        adapter = new NewSortAdapter(getActivity(), mSourceDateList);
+        adapter.setOnItemClickListener(this);
+//        adapter = new SortAdapter(getActivity(), mSourceDateList);
+
 //        mAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, dataList);
-        mListView.setAdapter(adapter);
+//        mListView.setAdapter(adapter);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mRecyclerView.setAdapter(adapter);
     }
 
     private void setUpEvents(){
@@ -150,7 +162,9 @@ public class ChooseFragment extends Fragment {
                 //该字母首次出现的位置
                 int position = adapter.getPositionForSection(s.charAt(0));
                 if (position != -1) {
-                    mListView.setSelection(position);
+//                    mListView.setSelection(position);
+                    // recyclerView 没有 setSelection, 这个等价
+                    mRecyclerView.getLayoutManager().scrollToPosition(position);
                 }
 
             }
@@ -179,28 +193,29 @@ public class ChooseFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                if (currentLevel == LEVEL_PROV) {
-                    String provName = ((SortModel) adapter.getItem(position)).getName();
-                    selectedProv = provinceMap.get(provName);
-                    queryCities();
-                } else if (currentLevel == LEVEL_CITY) {
-                    String cityName = ((SortModel) adapter.getItem(position)).getName();
-                    selectedCity = cityMap.get(cityName);
-                    queryCounties();
-                } else if (currentLevel == LEVEL_COUNTY) {
-                    String countyName = ((SortModel) adapter.getItem(position)).getName();
-                    String weatherId = countyMap.get(countyName).getWeatherId();
-                    // 如果没有缓存，是从这里进去的，那么当然 intent 会有东西了
-                    Intent intent = new Intent(getActivity(), WeatherActivity.class);
-                    intent.putExtra(WeatherActivity.WEATHER_ID, weatherId);
-                    startActivity(intent);
-                    getActivity().finish();
-                }
-            }
-        });
+
+//        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+//                if (currentLevel == LEVEL_PROV) {
+//                    String provName = ((SortModel) adapter.getItem(position)).getName();
+//                    selectedProv = provinceMap.get(provName);
+//                    queryCities();
+//                } else if (currentLevel == LEVEL_CITY) {
+//                    String cityName = ((SortModel) adapter.getItem(position)).getName();
+//                    selectedCity = cityMap.get(cityName);
+//                    queryCounties();
+//                } else if (currentLevel == LEVEL_COUNTY) {
+//                    String countyName = ((SortModel) adapter.getItem(position)).getName();
+//                    String weatherId = countyMap.get(countyName).getWeatherId();
+//                    // 如果没有缓存，是从这里进去的，那么当然 intent 会有东西了
+//                    Intent intent = new Intent(getActivity(), WeatherActivity.class);
+//                    intent.putExtra(WeatherActivity.WEATHER_ID, weatherId);
+//                    startActivity(intent);
+//                    getActivity().finish();
+//                }
+//            }
+//        });
         queryProvinces();
     }
 
@@ -245,10 +260,11 @@ public class ChooseFragment extends Fragment {
                 provinceMap.put(provName, prov);
             }
 
-            SourceDateList = filledData(dataList.toArray(new String[dataList.size()]));
+            mSourceDateList = filledData(dataList.toArray(new String[dataList.size()]));
+            Log.d("DEBUG", "DATALIST:" + mSourceDateList);
             // 根据a-z进行排序源数据
-            Collections.sort(SourceDateList, pinyinComparator);
-            adapter.updateListView(SourceDateList);
+            Collections.sort(mSourceDateList, pinyinComparator);
+            adapter.updateListView(mSourceDateList);
             currentLevel = LEVEL_PROV;
         } else {
             queryFromServer(defaultAddress, PROV_ARG);
@@ -273,10 +289,10 @@ public class ChooseFragment extends Fragment {
                 // 保存 String 和实体类的映射
                 cityMap.put(cityName, city);
             }
-            SourceDateList = filledData(dataList.toArray(new String[dataList.size()]));
+            mSourceDateList = filledData(dataList.toArray(new String[dataList.size()]));
             // 根据a-z进行排序源数据
-            Collections.sort(SourceDateList, pinyinComparator);
-            adapter.updateListView(SourceDateList);
+            Collections.sort(mSourceDateList, pinyinComparator);
+            adapter.updateListView(mSourceDateList);
             currentLevel = LEVEL_CITY;
         } else {
             int provCode = selectedProv.getProvinceCode();
@@ -287,7 +303,6 @@ public class ChooseFragment extends Fragment {
     private void queryCounties() {
         mClearEditText.setText("");
         mTextView.setText(selectedCity.getCityName());
-//        mButton.setVisibility(View.VISIBLE);
         mActionBar.setDisplayHomeAsUpEnabled(true);
         synchronized (County.class) {
             mCounties = DataSupport
@@ -302,10 +317,10 @@ public class ChooseFragment extends Fragment {
                 // 保存 String 和实体类的映射
                 countyMap.put(countyName, county);
             }
-            SourceDateList = filledData(dataList.toArray(new String[dataList.size()]));
+            mSourceDateList = filledData(dataList.toArray(new String[dataList.size()]));
             // 根据a-z进行排序源数据
-            Collections.sort(SourceDateList, pinyinComparator);
-            adapter.updateListView(SourceDateList);
+            Collections.sort(mSourceDateList, pinyinComparator);
+            adapter.updateListView(mSourceDateList);
             currentLevel = LEVEL_COUNTY;
         } else {
             int provCode = selectedProv.getProvinceCode();
@@ -318,7 +333,6 @@ public class ChooseFragment extends Fragment {
 
     private void queryFromServer(String address, final String type) {
         showProgressDialog();
-//        Log.d("DEBUG", address);
         HttpUtil.sendOkHttpRequest(address, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -334,14 +348,13 @@ public class ChooseFragment extends Fragment {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 String responseString = response.body().string();
-//                Log.d("DEBBUG", responseString);
                 boolean result = false;
                 if (type.equals(PROV_ARG)) {
-                    result = Helper.onProvinceResponse(responseString);
+                    result = WeatherHelper.onProvinceResponse(responseString);
                 } else if (type.equals(CITY_ARG)) {
-                    result = Helper.onCityResponse(responseString, selectedProv.getId());
+                    result = WeatherHelper.onCityResponse(responseString, selectedProv.getId());
                 } else if (type.equals(COUNTY_ARG)) {
-                    result = Helper.onCountyReponse(responseString, selectedCity.getId());
+                    result = WeatherHelper.onCountyReponse(responseString, selectedCity.getId());
                 }
                 if (result) {
                     getActivity().runOnUiThread(new Runnable() {
@@ -401,10 +414,10 @@ public class ChooseFragment extends Fragment {
         List<SortModel> filterDateList = new ArrayList<SortModel>();
 
         if (TextUtils.isEmpty(filterStr)) {
-            filterDateList = SourceDateList;
+            filterDateList = mSourceDateList;
         } else {
             filterDateList.clear();
-            for (SortModel sortModel : SourceDateList) {
+            for (SortModel sortModel : mSourceDateList) {
                 String name = sortModel.getName();
                 if (name.toUpperCase().contains(filterStr.toUpperCase())
                         || characterParser.getSelling(name).toUpperCase()
@@ -416,5 +429,26 @@ public class ChooseFragment extends Fragment {
         // 根据a-z进行排序
         Collections.sort(filterDateList, pinyinComparator);
         adapter.updateListView(filterDateList);
+    }
+
+    @Override
+    public void onChooserItemClick(int position) {
+        if (currentLevel == LEVEL_PROV) {
+            String provName = ((SortModel) adapter.getItem(position)).getName();
+            selectedProv = provinceMap.get(provName);
+            queryCities();
+        } else if (currentLevel == LEVEL_CITY) {
+            String cityName = ((SortModel) adapter.getItem(position)).getName();
+            selectedCity = cityMap.get(cityName);
+            queryCounties();
+        } else if (currentLevel == LEVEL_COUNTY) {
+            String countyName = ((SortModel) adapter.getItem(position)).getName();
+            String weatherId = countyMap.get(countyName).getWeatherId();
+            // 如果没有缓存，是从这里进去的，那么当然 intent 会有东西了
+            Intent intent = new Intent(getActivity(), WeatherActivity.class);
+            intent.putExtra(WeatherActivity.WEATHER_ID, weatherId);
+            startActivity(intent);
+            getActivity().finish();
+        }
     }
 }
