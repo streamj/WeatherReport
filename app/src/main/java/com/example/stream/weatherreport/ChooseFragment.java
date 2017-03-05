@@ -64,12 +64,10 @@ public class ChooseFragment extends Fragment implements NewSortAdapter.OnItemCli
     private ProgressDialog mProgressDialog;
     @BindView(R.id.toolbar_text_view)
     TextView mTextView;
-//    @BindView(R.id.choose_list_view)
-//    ListView mListView;
 
     @BindView(R.id.choose_list_view)
     RecyclerView mRecyclerView;
-    //    private ArrayAdapter<String> mAdapter;
+
     private List<String> dataList = new ArrayList<>();
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -82,7 +80,6 @@ public class ChooseFragment extends Fragment implements NewSortAdapter.OnItemCli
     @BindView(R.id.dialog)
     TextView dialog;
 
-//    private SortAdapter adapter;
     private NewSortAdapter adapter;
 
     @BindView(R.id.filter_edit)
@@ -145,10 +142,7 @@ public class ChooseFragment extends Fragment implements NewSortAdapter.OnItemCli
         mSourceDateList = new ArrayList<>();
         adapter = new NewSortAdapter(getActivity(), mSourceDateList);
         adapter.setOnItemClickListener(this);
-//        adapter = new SortAdapter(getActivity(), mSourceDateList);
 
-//        mAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, dataList);
-//        mListView.setAdapter(adapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecyclerView.setAdapter(adapter);
     }
@@ -193,29 +187,6 @@ public class ChooseFragment extends Fragment implements NewSortAdapter.OnItemCli
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-//        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-//                if (currentLevel == LEVEL_PROV) {
-//                    String provName = ((SortModel) adapter.getItem(position)).getName();
-//                    selectedProv = provinceMap.get(provName);
-//                    queryCities();
-//                } else if (currentLevel == LEVEL_CITY) {
-//                    String cityName = ((SortModel) adapter.getItem(position)).getName();
-//                    selectedCity = cityMap.get(cityName);
-//                    queryCounties();
-//                } else if (currentLevel == LEVEL_COUNTY) {
-//                    String countyName = ((SortModel) adapter.getItem(position)).getName();
-//                    String weatherId = countyMap.get(countyName).getWeatherId();
-//                    // 如果没有缓存，是从这里进去的，那么当然 intent 会有东西了
-//                    Intent intent = new Intent(getActivity(), WeatherActivity.class);
-//                    intent.putExtra(WeatherActivity.WEATHER_ID, weatherId);
-//                    startActivity(intent);
-//                    getActivity().finish();
-//                }
-//            }
-//        });
         queryProvinces();
     }
 
@@ -248,7 +219,6 @@ public class ChooseFragment extends Fragment implements NewSortAdapter.OnItemCli
 
     private void queryProvinces() {
         mTextView.setText("选择省份");
-//        mButton.setVisibility(View.GONE);
         mActionBar.setDisplayHomeAsUpEnabled(false);
         mProvinceList = DataSupport.findAll(Province.class);
         if (mProvinceList.size() > 0) {
@@ -274,7 +244,6 @@ public class ChooseFragment extends Fragment implements NewSortAdapter.OnItemCli
     private void queryCities() {
         mClearEditText.setText("");
         mTextView.setText(selectedProv.getProvinceName());
-//        mButton.setVisibility(View.VISIBLE);
         mActionBar.setDisplayHomeAsUpEnabled(true);
         synchronized (City.class) {
             mCityList = DataSupport
@@ -325,8 +294,6 @@ public class ChooseFragment extends Fragment implements NewSortAdapter.OnItemCli
         } else {
             int provCode = selectedProv.getProvinceCode();
             int cityCode = selectedCity.getCityCode();
-            String addresss = defaultAddress + "/" + provCode + "/" + cityCode;
-//            Log.d("DEBUG", addresss);
             queryFromServer(defaultAddress + "/" + provCode + "/" + cityCode, COUNTY_ARG);
         }
     }
