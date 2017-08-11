@@ -159,7 +159,6 @@ public class WeatherActivity extends AppCompatActivity {
         }
         setUpSwipeRefresh(weatherId);
 
-
         String bingpic = prefs.getString(BING_PIC, null);
         if (bingpic != null) {
             Glide.with(this).load(bingpic).into(bingImage);
